@@ -1,24 +1,24 @@
-import { BrowserRouter,Routes,Route } from 'react-router-dom'
-import Navbar from './pages/Navbar'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import axios from 'axios'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import axios from 'axios';
+import { UserContextProvider } from './UseContext.jsx';
 
-axios.defaults.baseURL='http://localhost:3000/'
+axios.defaults.baseURL = 'http://localhost:3000/';
+
 const App = () => {
   return (
-    <div>
+    <UserContextProvider>
       <BrowserRouter>
-   <Routes>
-    <Route path='/' element={<Home/>}></Route>
-    <Route path='/login' element={<Login/>}></Route>
-     <Route path="/register" element={<Register/>}></Route>
-
-   </Routes>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
+        </Routes>
       </BrowserRouter>
-    </div>
-  )
+    </UserContextProvider>
+  );
 }
 
-export default App
+export default App;

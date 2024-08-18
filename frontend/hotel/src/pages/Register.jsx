@@ -45,7 +45,7 @@ const Register = () => {
                <button className='btn bg-red-400 cursor-pointer p-4 rounded-3xl text-white text-xl'>Register</button>
               <div className='text-center  py-2 text-gray-500'>
                Already member?
-                <Link className='underline text-black'to ={'/register'}>Login</Link>
+                <Link className='underline text-black'to ={'/login'}>Login</Link>
               </div>
 
             </form>

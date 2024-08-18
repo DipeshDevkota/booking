@@ -1,21 +1,24 @@
-import  { useState } from 'react'
+import  { useContext, useState } from 'react'
 import Navbar from './Navbar'
 import axios from 'axios'
 import {Link, Navigate} from 'react-router-dom'
+import { UserContext } from '../UseContext'
+
 const Login = () => {
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
   const [redirect,setRedirect]= useState(false);
-
+  const {setUser}=useContext(UserContext);
 
 const  submitHandler=async(e)=>{
     e.preventDefault();
    try {
-    await axios.post('http://localhost:3000/api/users/login',{
+    const response= await axios.post('http://localhost:3000/api/users/login',{
      email,
      password
     },
   {withCredentials:true});
+  setUser(response.data)
     alert('Login successfull')
     setRedirect(true);
    } catch (error) {

@@ -34,30 +34,43 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Check if email and password are provided
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password are required" });
+        }
+
         // Find the user by email
-        const user = await User.findOne({ email });
-        if (!user) {
+        const userDoc = await User.findOne({ email });
+        if (!userDoc) {
             return res.status(400).json({ message: "User not found" });
         }
 
         // Check if the password matches
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        const isPasswordMatch = await bcrypt.compare(password, userDoc.password);
         if (!isPasswordMatch) {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
         // Generate a token
-        const token = jwt.sign({ email: user.email, id: user._id }, process.env.SECRET_KEY, { expiresIn: '30d' });
+        const token = jwt.sign(
+            { email: userDoc.email, id: userDoc._id },
+            process.env.SECRET_KEY,
+            { expiresIn: '30d' }
+        );
 
         // Set token as a cookie
-        res.cookie("jwttoken", token, { httpOnly: true });
+        res.cookie("jwttoken", token, { httpOnly: true })
+           .status(200)
+           .json({
+               message: "Login successful",
+               user: {
+                   id: userDoc._id,
+                   name: userDoc.name,
+                   email: userDoc.email
+               },
+               token
+           });
 
-        // Respond with success message and token
-        return res.status(200).json({
-            message: "Login successful",
-            user,
-            token
-        });
     } catch (error) {
         console.error("Login failed", error);
         return res.status(500).json({ message: "Internal server error" });
