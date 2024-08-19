@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Navbar from './Navbar'
 import axios from 'axios'
 import {Link} from 'react-router-dom'
+
 const Register = () => {
 
     const registerUser= async(e)=>{
@@ -24,13 +25,15 @@ const Register = () => {
     const [name,setName] = useState('');
     const [email,setEmail]= useState('');
     const [password,setPassword]= useState('')
+
+
   return (
     <div>
 
         <Navbar/>
 
 
-        <div className='mt-4 grow  justify-center items-center  '>
+        <div className='mt-48 grow  justify-center items-center  '>
             <h1 className='text-4xl text-center '>Register</h1>
             <form onSubmit={registerUser} className=' max-w-md mx-auto border flex flex-col gap-2 p-2 mt-3  '>
                <input type='text' placeholder='John Doe' className='p-4 rounded-3xl ' 

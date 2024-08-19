@@ -5,6 +5,8 @@ const databaseConnection = require('./config/dbConnection');
 const userroute= require('./routes/user.routes')
 const app = express();
 const port = 3000;
+const cookieParser = require('cookie-parser');
+
 app.use(express.json())
 // Use CORS middleware
 
@@ -12,7 +14,7 @@ databaseConnection();
 
 
 require('dotenv').config();
-
+app.use(cookieParser())
 app.use(cors(
     {
         credentials:true,

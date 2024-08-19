@@ -46,7 +46,7 @@ const  submitHandler=async(e)=>{
         <Navbar/>
 
 
-        <div className='mt-4 grow  justify-center items-center  '>
+        <div className='mt-52 grow  justify-center items-center  '>
             <h1 className='text-4xl text-center '>LogIn</h1>
             <form onSubmit={submitHandler} className=' max-w-md mx-auto border flex flex-col gap-2 p-2 mt-3 '>
                
