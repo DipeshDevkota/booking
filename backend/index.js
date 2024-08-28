@@ -3,6 +3,7 @@ const cors = require('cors');
 const databaseConnection = require('./config/dbConnection');
 // const User = require('./model/User.model')
 const userroute= require('./routes/user.routes')
+const placeroute = require('./routes/place.routes')
 const app = express();
 const port = 3000;
 const cookieParser = require('cookie-parser');
@@ -28,6 +29,8 @@ app.get('/test', (req, res) => {
 });
 
 app.use('/api/users',userroute)
+
+app.use('/api/place',placeroute)
 // Start the server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
