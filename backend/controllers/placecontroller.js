@@ -1,7 +1,7 @@
 const { findByIdAndDelete } = require('../model/User.model');
 const Place = require('./placecontroller')
-
-
+const imagedownloader = require('image-downloader')
+const path = require('path');
 
 const addPlace = async (req, res) => {
     try {
@@ -50,8 +50,61 @@ const deletePlace = async (req, res) => {
     }
   };
 
+  const placeByLink = async (req, res) => {
+    try {
+      const { link } = req.body;
+      if (!link) {
+        throw new Error('No link provided');
+      }
+      
+      console.log("Received link:", link); // Debug: Log the link received
+      
+      const newName = `${Date.now()}.jpg`;
+      const dest = path.join(__dirname, '../uploads', newName);
+      
+      // Validate URL
+      if (!/^https?:\/\/.+/.test(link)) {
+        throw new Error('Invalid URL format');
+      }
+      
+      await imagedownloader.image({
+        url: link,
+        dest: dest,
+      });
+      
+      res.json({ message: 'Image downloaded successfully', imageName: newName });
+    } catch (error) {
+      console.error('Error downloading image:', error); // Detailed logging
+      res.status(500).json({ message: 'Error downloading image', error });
+    }
+  };
+
+
+  const uploadPhoto = async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).send('No file uploaded');
+      }
+  
+      // Log the uploaded file information
+      console.log('photo is:', req.file);
+  
+      res.json({
+        message: 'File uploaded successfully',
+        file: req.file,
+        filepath: `/photoupload/images/${req.file.filename}`
+      });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      res.status(500).json({ message: "Error uploading file" });
+    }
+  };
+  
+
   module.exports={
     addPlace,
-    deletePlace
+    deletePlace,
+    placeByLink,
+    uploadPhoto
   }
   

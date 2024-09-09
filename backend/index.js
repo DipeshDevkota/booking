@@ -6,6 +6,7 @@ const userroute= require('./routes/user.routes')
 const placeroute = require('./routes/place.routes')
 const app = express();
 const port = 3000;
+const path = require('path')
 const cookieParser = require('cookie-parser');
 
 app.use(express.json())
@@ -22,6 +23,8 @@ app.use(cors(
         origin:'http://localhost:5173'
     }
 ));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/upload', express.static(path.join(__dirname, 'photoupload/images')));
 
 // Define routes
 app.get('/test', (req, res) => {

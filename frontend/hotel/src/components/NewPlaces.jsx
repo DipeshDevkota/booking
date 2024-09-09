@@ -1,10 +1,12 @@
-import  { useState } from 'react';
+import { useState } from 'react';
+import axios from 'axios';
 
 const NewPlaces = () => {
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
-  const [photos, setPhotos] = useState('');
+  const [photos, setPhotos] = useState(null); // For file input
   const [photoLink, setPhotoLink] = useState('');
+  const [addedPhotos, setAddedPhotos] = useState([]);
   const [description, setDescription] = useState('');
   const [perks, setPerks] = useState([]);
   const [newPerk, setNewPerk] = useState('');
@@ -24,9 +26,59 @@ const NewPlaces = () => {
     setPerks(perks.filter(perk => perk !== perkToRemove));
   };
 
+  const addPhotoByLink = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.post('http://localhost:3000/api/place/uploadbylink', { link: photoLink });
+      setAddedPhotos([...addedPhotos, data.imageName]);
+      setPhotoLink('');
+    } catch (error) {
+      console.error('Error uploading photo by link', error);
+    }
+  };
+
+  const uploadPhoto = async (e) => {
+    e.preventDefault();
+    try {
+      if (!photos) {
+        alert("No photo selected!");
+        return;
+      }
+  
+      const formData = new FormData();
+      formData.append('photo', photos);
+  
+      const { data } = await axios.post('http://localhost:3000/api/place/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+  
+      setAddedPhotos([...addedPhotos, data.filepath]);
+    } catch (error) {
+      console.error('Error uploading photo', error);
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPhotos(file);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission logic here
+    const formData = {
+      title,
+      address,
+      description,
+      perks,
+      extraInfo,
+      checkIn,
+      checkOut,
+      maxGuests,
+      photos: addedPhotos // Include added photos in the form data
+    };
+    console.log('Form Data:', formData);
   };
 
   return (
@@ -74,113 +126,142 @@ const NewPlaces = () => {
               placeholder="Add using a link (e.g., ...jpg)"
               className="mb-4 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <button
+              onClick={addPhotoByLink}
+              className='bg-gray-200 px-4 py-2 rounded-2xl text-gray-700 hover:bg-gray-300'
+            >
+              Add Photo by Link
+            </button>
+
             <input
               type="file"
-              value={photos}
-              onChange={(e) => setPhotos(e.target.files[0])}
-              className="p-3 border border-gray-300 rounded-lg w-full bg-gray-50 text-gray-700"
+              onChange={handleFileUpload}
+              className="p-3 border border-gray-300 rounded-lg w-full bg-gray-50 text-gray-700 mt-4"
             />
+
+            <button
+              onClick={uploadPhoto}
+              className='bg-gray-200 px-4 py-2 rounded-2xl text-gray-700 hover:bg-gray-300'
+            >
+              Upload Photo
+            </button>
+
           </div>
 
-          {/* Description Input */}
+          {/* Render added photos */}
+          <div className="mt-4">
+            <h3 className="text-lg font-medium text-gray-800 mb-2">Added Photos:</h3>
+            <div className="grid grid-cols-3 gap-4">
+              {addedPhotos.map((photo, index) => (
+                <img
+                  key={index}
+                  src={`http://localhost:3000/uploads/${photo}`} // Assuming your uploads are served from /uploads folder
+                  alt="Uploaded"
+                  className="w-full h-40 object-cover rounded-lg shadow-lg"
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Other Inputs */}
           <div>
             <label className="block mb-2 text-lg font-medium text-gray-700">
               Description
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter description"
+                className="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </label>
-            <textarea
-              placeholder="Enter description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="p-3 border border-gray-300 rounded-lg w-full h-40 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
           </div>
 
-          {/* Perks Section */}
+          {/* Perks */}
           <div>
-            <h4 className="text-xl font-semibold text-gray-800 mb-4">Perks</h4>
-            <div className="flex flex-col gap-2 mb-4">
-              {perks.map((perk, index) => (
-                <div key={index} className="flex items-center gap-2 text-gray-700">
-                  <span>{perk}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemovePerk(perk)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
+            <label className="block mb-2 text-lg font-medium text-gray-700">
+              Perks
+            </label>
+            <div className="flex gap-2">
               <input
                 type="text"
                 value={newPerk}
                 onChange={(e) => setNewPerk(e.target.value)}
-                placeholder="Add new perk"
+                placeholder="Add a perk"
                 className="p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
-                type="button"
                 onClick={handleAddPerk}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                className='bg-gray-200 px-4 py-2 rounded-2xl text-gray-700 hover:bg-gray-300'
               >
-                Add Perk
+                Add
               </button>
             </div>
+            <ul className="mt-2">
+              {perks.map((perk, index) => (
+                <li key={index} className="flex justify-between items-center py-1">
+                  <span>{perk}</span>
+                  <button
+                    onClick={() => handleRemovePerk(perk)}
+                    className='text-red-500 hover:text-red-600'
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Extra Info Input */}
+          {/* Extra Info */}
           <div>
             <label className="block mb-2 text-lg font-medium text-gray-700">
               Extra Info
+              <textarea
+                value={extraInfo}
+                onChange={(e) => setExtraInfo(e.target.value)}
+                placeholder="Enter extra information"
+                className="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </label>
-            <textarea
-              placeholder="Enter information"
-              value={extraInfo}
-              onChange={(e) => setExtraInfo(e.target.value)}
-              className="p-3 border border-gray-300 rounded-lg w-full h-40 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
           </div>
 
-          {/* Check-In & Check-Out Times */}
-          <div className="bg-white shadow-lg rounded-lg p-6 max-w-md mx-auto">
-            <h2 className="text-lg font-semibold text-center text-gray-800 mb-6">Check-in & Check-out Times</h2>
-            <div className="flex justify-center md:grid-cols-2 gap-4">
-              {/* Check-in time */}
-              <div className="p-4 bg-gray-100 rounded-lg shadow-md">
-                <label className="block text-gray-600 text-sm font-medium mb-2">Check-in Time</label>
+          {/* Check-In/Check-Out */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block mb-2 text-lg font-medium text-gray-700">
+                Check-In Time
                 <input
                   type="time"
                   value={checkIn}
                   onChange={(e) => setCheckIn(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-              </div>
-
-              {/* Check-out time */}
-              <div className="p-4 bg-gray-100 rounded-lg shadow-md">
-                <label className="block text-gray-600 text-sm font-medium mb-2">Check-out Time</label>
+              </label>
+            </div>
+            <div className="flex-1">
+              <label className="block mb-2 text-lg font-medium text-gray-700">
+                Check-Out Time
                 <input
                   type="time"
                   value={checkOut}
                   onChange={(e) => setCheckOut(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-              </div>
-
-              {/* Max Guests */}
-              <div className="p-4 bg-gray-100 rounded-lg shadow-md col-span-full">
-                <label className="block text-gray-600 text-sm font-medium mb-2">Max Guests</label>
-                <input
-                  type="number"
-                  value={maxGuests}
-                  onChange={(e) => setMaxGuests(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  placeholder="Enter number of guests"
-                />
-              </div>
+              </label>
             </div>
+          </div>
+
+          {/* Max Guests */}
+          <div>
+            <label className="block mb-2 text-lg font-medium text-gray-700">
+              Max Guests
+              <input
+                type="number"
+                value={maxGuests}
+                onChange={(e) => setMaxGuests(Number(e.target.value))}
+                min="1"
+                className="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </label>
           </div>
 
           {/* Submit Button */}
