@@ -2,6 +2,9 @@ const { findByIdAndDelete } = require('../model/User.model');
 const Place = require('./placecontroller')
 const imagedownloader = require('image-downloader')
 const path = require('path');
+const cloudinary = require('../config/cloudinary');
+const multer = require('multer');
+
 
 const addPlace = async (req, res) => {
     try {
@@ -80,25 +83,46 @@ const deletePlace = async (req, res) => {
   };
 
 
+  const storage= multer.memoryStorage();
+  const upload= multer({storage:storage}).single('image')
+
   const uploadPhoto = async (req, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).send('No file uploaded');
-      }
+      upload.single('image')(req, res, async (err) => {
+        if (err || !req.file) {
+          return res.status(400).json({ message: 'No file uploaded or error in file upload' });
+        }
   
-      // Log the uploaded file information
-      console.log('photo is:', req.file);
+        // Upload the file buffer to Cloudinary
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: 'photoupload/images' }, // Adjust folder as needed
+          (error, result) => {
+            if (error) {
+              console.error('Error uploading to Cloudinary:', error);
+              return res.status(500).json({ message: 'Error uploading to Cloudinary' });
+            }
   
-      res.json({
-        message: 'File uploaded successfully',
-        file: req.file,
-        filepath: `/photoupload/images/${req.file.filename}`
+            // Log and return the Cloudinary URL to the client
+            console.log('Uploaded file to Cloudinary:', result);
+  
+            res.json({
+              message: 'File uploaded successfully',
+              fileUrl: result.secure_url // Cloudinary URL for the uploaded image
+            });
+          }
+        );
+  
+        // Use the file buffer to upload
+        streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
       });
     } catch (error) {
-      console.error('Error uploading file:', error);
-      res.status(500).json({ message: "Error uploading file" });
+      console.error('Error in uploading process:', error);
+      res.status(500).json({ message: 'Error uploading file' });
     }
   };
+  
+
+
   
 
   module.exports={

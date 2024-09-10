@@ -38,32 +38,70 @@ const NewPlaces = () => {
   };
 
   const uploadPhoto = async (e) => {
-    e.preventDefault();
+    console.log(e)
+    console.log(photos)
+    e.preventDefault(); // Ensure the default form action doesn't occur
+    if (!photos) {
+      console.error('No files selected');
+      return;
+    }
+  
     try {
-      if (!photos) {
-        alert("No photo selected!");
-        return;
-      }
-  
       const formData = new FormData();
-      formData.append('photo', photos);
+      formData.append('image', photos); // Add selected file to formData
   
-      const { data } = await axios.post('http://localhost:3000/api/place/upload', formData, {
+      const response = await axios.post('http://localhost:3000/api/place/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
   
-      setAddedPhotos([...addedPhotos, data.filepath]);
+      const { data: filename } = response;
+      setAddedPhotos(prev => [...prev, filename]); // Add the uploaded filename to addedPhotos
     } catch (error) {
       console.error('Error uploading photo', error);
     }
   };
-
+  
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setPhotos(file);
+      setPhotos(file); // Set the selected file to state
     }
   };
+  
+
+  // const uploadPhoto = async (e) => {
+
+  //   const files= e.target.files;
+  //   console.log(e)
+  //   console.log("file is:",files)
+  //   try {
+
+  //     const formData = new FormData();
+  //     formData.set('photo', files);
+  
+  //     axios.post('http://localhost:3000/api/place/upload', formData, {
+  //       headers: { 'Content-Type': 'multipart/form-data' },
+  //     }).then(response=>{
+         
+  //       const {data:filename}= response;
+  //       setAddedPhotos(prev =>{
+  //         return [...prev,filename];
+          
+  //       })
+  //     })
+  
+  //     setAddedPhotos([...addedPhotos, files.filepath]);
+  //   } catch (error) {
+  //     console.error('Error uploading photo', error);
+  //   }
+  // };
+
+  // const handleFileUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setPhotos(file);
+  //   }
+  // };
 
   const handleSubmit = (e) => {
     e.preventDefault();
