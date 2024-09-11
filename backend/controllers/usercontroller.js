@@ -1,7 +1,7 @@
 const User = require('../model/User.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const Place = require('../model/Place.model')
 
 const registerUser = async (req, res) => {
     try {
@@ -89,6 +89,15 @@ const profileUser = async (req, res) => {
             return res.status(401).json({ message: "No token provided" });
         }
 
+        const { title,
+            address,
+            description,
+            perks,
+            extraInfo,
+            checkIn,
+            checkOut,
+            maxGuests,} = req.body;
+
         jwt.verify(jwttoken, process.env.SECRET_KEY, (err, user) => {
             if (err) {
                 return res.status(403).json({ message: "Invalid token" });
@@ -104,6 +113,11 @@ const profileUser = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
+
+
+
+
 
 
 // const profileUser = (req, res) => {
@@ -147,5 +161,6 @@ module.exports = {
     registerUser,
     loginUser,
     profileUser,
-    logoutUser
+    logoutUser,
+    getallplace
 };

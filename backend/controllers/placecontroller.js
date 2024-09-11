@@ -9,7 +9,10 @@ const multer = require('multer');
 
 const addPlace = async (req, res) => {
     try {
-      const { address, description } = req.body;
+
+      const {token}= req.cookies;
+
+      const { title,address,description,perks,extraInfo,checkIn,checkOut,maxGuests } = req.body;
   
       // `req.file` is used to access the uploaded file (if any)
       let image = null;
@@ -31,6 +34,16 @@ const addPlace = async (req, res) => {
       res.status(500).json({ message: 'Server error', error });
     }
   };
+
+
+  const getallplace= async(req,res)=>{
+
+    const {jwttoken} = req.cookies;
+    jwt.verify(jwttoken, process.env.SECRET_KEY,{},async (err, user) => {
+     const {_id}= user;
+     res.json(await Place.find({owner:id}))
+  });
+  }
   
 
 const deletePlace = async (req, res) => {
@@ -167,6 +180,8 @@ const deletePlace = async (req, res) => {
       return res.status(500).json({ message: 'Server error' });
     }
   };
+
+
   
 
 
