@@ -1,5 +1,6 @@
 const { findByIdAndDelete } = require('../model/User.model');
-const Place = require('./placecontroller')
+// const Place = require('./placecontroller')
+const Place = require('../model/Place.model')
 const imagedownloader = require('image-downloader')
 const path = require('path');
 const cloudinary = require('../config/cloudinary');
@@ -123,12 +124,59 @@ const deletePlace = async (req, res) => {
   
 
 
+  const onformSubmit = async (req, res) => {
+    try {
+      const {
+        title,
+        address,
+        description,
+        perks,
+        extraInfo,
+        checkIn,
+        checkOut,
+        maxGuests,
+      } = req.body;
+  
+      // Check for missing required fields
+      if (!title || !address || !description || !perks || !checkIn || !checkOut || !maxGuests) {
+        return res.status(400).json({ message: "Field empty" });
+      }
+  
+      // Create new place entry
+      const place = new Place({
+        title,
+        address,
+        description,
+        perks,
+        extraInfo,
+        checkIn,
+        checkOut,
+        maxGuests,
+      });
+  
+      await place.save();
+  
+      // Send a proper JSON response with both the message and place data
+      res.status(200).json({
+        message: "All fields are updated",
+        place, // Include the place object in the response
+      });
+  
+    } catch (error) {
+      console.error('Error in form submission:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+  };
+  
+
+
   
 
   module.exports={
     addPlace,
     deletePlace,
     placeByLink,
-    uploadPhoto
+    uploadPhoto,
+    onformSubmit
   }
   

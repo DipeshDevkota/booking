@@ -103,7 +103,7 @@ const NewPlaces = () => {
   //   }
   // };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = {
       title,
@@ -117,6 +117,16 @@ const NewPlaces = () => {
       photos: addedPhotos // Include added photos in the form data
     };
     console.log('Form Data:', formData);
+
+  try {
+  const  response = await axios.post('http://localhost:3000/api/place/formsubmit',formData);
+   console.log(response)
+   console.log('Response is :',response.data)
+  
+} catch (error) {
+  console.error('Error submitting form',error)
+  
+}
   };
 
   return (
