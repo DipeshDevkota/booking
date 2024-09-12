@@ -162,5 +162,5 @@ module.exports = {
     loginUser,
     profileUser,
     logoutUser,
-    getallplace
+
 };
