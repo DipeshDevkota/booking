@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.SECRET_KEY;
 
 const isAuthenticated = async(req,res,next)=>{
     try {
-        const token = req.cookies.token;
+        const token = req.cookies.jwttoken;
         if(!token){
             return res.status(401).json({
                 message:'You are not logged in(token invalid)!'
@@ -13,7 +13,7 @@ const isAuthenticated = async(req,res,next)=>{
         }
 
 
-        const decoded= await promisify(jwt.verify)(jwttoken,JWT_SECRET);
+        const decoded= await promisify(jwt.verify)(token,JWT_SECRET);
 
         const user = await User.findById(decoded.id);
 

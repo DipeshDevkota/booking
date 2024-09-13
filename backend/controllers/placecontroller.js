@@ -40,17 +40,18 @@ const addPlace = async (req, res) => {
 const getallplace = async (req, res) => {
 
   try {
+
     console.log('Req is:',req)
     console.log('ReqUser is:',req.userId)
 
     const userId = req.userId;
 
     const places = await Place.find({ userId });
-    res.json(places);
+    return res.json(places);
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server Error" })
+    console.error('Error fetching places:',err);
+    return res.status(500).json({ message: "Server Error" });
 
   }
 
