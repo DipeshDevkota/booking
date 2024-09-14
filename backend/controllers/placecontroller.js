@@ -28,6 +28,7 @@ const addPlace = async (req, res) => {
     });
 
     await place.save();
+    console.log('Places is ',place)
 
     res.status(201).json({ message: 'Place added successfully', place });
   } catch (error) {
