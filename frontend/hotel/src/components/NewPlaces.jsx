@@ -50,7 +50,7 @@ const NewPlaces = () => {
       const formData = new FormData();
       formData.append('image', photos); // Add selected file to formData
   
-      const response = await axios.post('http://localhost:3000/api/place/upload', formData, {
+      const response = await axios.post('http://localhost:3000/api/place/add', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
   
@@ -119,7 +119,7 @@ const NewPlaces = () => {
     console.log('Form Data:', formData);
 
   try {
-  const  response = await axios.post('http://localhost:3000/api/place/formsubmit',formData);
+  const  response = await axios.post('http://localhost:3000/api/place/add',formData);
    console.log(response)
    console.log('Response is :',response.data)
   
