@@ -29,7 +29,7 @@ const NewPlaces = () => {
   const addPhotoByLink = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:3000/api/place/uploadbylink', { link: photoLink });
+      const { data } = await axios.post('http://localhost:3000/api/place/add', { link: photoLink });
       setAddedPhotos([...addedPhotos, data.imageName]);
       setPhotoLink('');
     } catch (error) {

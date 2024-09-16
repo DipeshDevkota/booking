@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const PlaceSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  address: { type: String, required: true },
-  description: { type: String, required: true },
+  title: { type: String },
+  address: { type: String },
+  description: { type: String },
   image: { type: String }, 
   perks: [String],
   extraInfo: String,

@@ -2,7 +2,7 @@ const { findByIdAndDelete } = require('../model/User.model');
 const Place = require('../model/Place.model')
 const imagedownloader = require('image-downloader')
 const path = require('path');
-const uploadonCloudinary = require('../utils/cloudinary');
+const uploadonCloudinary = require('../config/cloudinary');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');  // Add this line
 const { promisify } = require('util');
@@ -40,57 +40,72 @@ const { promisify } = require('util');
 
 const addPlace = async (req, res) => {
   try {
-    const { token } = req.cookies; // Check if token is present
-    if (!token) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
+    // const { token } = req.cookies; // Check if token is present
+    // if (!token) {
+    //   return res.status(401).json({ message: 'Authentication required' });
+    // }
 
-    const { 
-      title, 
-      address, 
-      description, 
-      perks, 
-      extraInfo, 
-      checkIn, 
-      checkOut, 
-      maxGuests, 
-      link 
+    const {
+      title,
+      address,
+      description,
+      perks,
+      extraInfo,
+      checkIn,
+      checkOut,
+      maxGuests,
+      link
     } = req.body;
 
     // Validate required fields
-    if (!title || !address || !description || !perks || !checkIn || !checkOut || !maxGuests) {
-      return res.status(400).json({ message: 'Missing required fields' });
-    }
+    // if (!title || !address || !description || !perks || !checkIn || !checkOut || !maxGuests) {
+    //   return res.status(400).json({ message: 'Missing required fields' });
+    // }
 
     let imageUrls = []; // Store downloaded or uploaded image URLs
+
+    const handleImageFromLink = async (link) => {
+      try {
+        const newName = `${Date.now()}.jpg`;
+        const dest = path.join(__dirname, '../uploads', newName);
+
+        await imagedownloader.image({
+          url: link,
+          dest: dest,
+        });
+
+        console.log('Image downloaded successfully:', newName);
+        return await uploadonCloudinary(dest); // Upload the downloaded image to Cloudinary
+      }
+      catch (error) {
+        throw new Error('Error handling image from link: ' + error.message);
+      }
+    };
+
+
+    
 
     // Download image from link if provided
     if (link) {
       if (!/^https?:\/\/.+/.test(link)) {
+
+
         throw new Error('Invalid URL format');
       }
 
-      const newName = `${Date.now()}.jpg`;
-      const dest = path.join(__dirname, '../uploads', newName);
+      const newName = handleImageFromLink(link);
 
-      await imagedownloader.image({
-        url: link,
-        dest: dest,
-      });
-
-      console.log('Image downloaded successfully:', newName);
       imageUrls.push(newName); // Push the local image path to imageUrls array
     }
 
     // Handle image upload if a file is provided (assumes `req.file` comes from middleware like multer)
     if (req.file) {
-      const cloudinaryResponse = await uploadonCloudinary(req.file.path);
-      if (cloudinaryResponse) {
-        const imageUrl = cloudinaryResponse.secure_url;
-        imageUrls.push(imageUrl); // Add Cloudinary URL to image array
-        fs.unlinkSync(req.file.path); // Remove file from local storage
-      }
+      const imageUrl = uploadonCloudinary(req.file.path)
+
+      imageUrls.push(imageUrl); // Add Cloudinary URL to image array
+      fs.unlinkSync(req.file.path); // Remove file from local storage
     }
+
 
     // Create and save the new place
     const newPlace = new Place({
@@ -111,7 +126,7 @@ const addPlace = async (req, res) => {
     res.status(201).json({ message: 'Place added successfully', place: newPlace });
 
   } catch (error) {
-    console.error('Error adding place:', error.message || error);
+    console.log('Error adding place:', error.message || error);
     res.status(500).json({ message: 'Server error', error: error.message || error });
   }
 };
@@ -123,8 +138,8 @@ const getallplace = async (req, res) => {
 
   try {
 
-    console.log('Req is:',req)
-    console.log('ReqUser is:',req.userId)
+    console.log('Req is:', req)
+    console.log('ReqUser is:', req.userId)
 
     const userId = req.userId;
 
@@ -132,7 +147,7 @@ const getallplace = async (req, res) => {
     return res.json(places);
 
   } catch (err) {
-    console.error('Error fetching places:',err);
+    console.error('Error fetching places:', err);
     return res.status(500).json({ message: "Server Error" });
 
   }
