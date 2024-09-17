@@ -243,7 +243,7 @@ const onformSubmit = async (req, res) => {
       checkIn,
       checkOut,
       maxGuests,
-      photos // Ensure this matches the frontend key
+      photos 
     } = req.body;
 
     // Check for missing required fields
@@ -261,7 +261,7 @@ const onformSubmit = async (req, res) => {
       checkIn,
       checkOut,
       maxGuests,
-      images: photos // Save the images/URLs into the place
+      image: photos 
     });
 
     await place.save();

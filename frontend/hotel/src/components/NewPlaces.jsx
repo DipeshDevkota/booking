@@ -33,9 +33,7 @@ const NewPlaces = () => {
     e.preventDefault();
     try {
       const { data } = await axios.post('http://localhost:3000/api/place/add', { link: photoLink });
-      console.log('Added photo response:',data);
-      console.log('Added photo response:',data.place.image[0]);
-
+      console.log('Added photo response:', data);
       setAddedPhotos([...addedPhotos, data.place.image[0]]);
       setPhotoLink('');
     } catch (error) {
@@ -45,7 +43,6 @@ const NewPlaces = () => {
 
   // Handle photo upload via file input
   const uploadPhoto = async (e) => {
-    console.log('Photo is',e)
     e.preventDefault();
     if (!photos) {
       console.error('No files selected');
@@ -60,8 +57,9 @@ const NewPlaces = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
   
-      const { data: filename } = response;
-      setAddedPhotos(prev => [...prev, filename]); 
+      const { data } = response;
+      console.log('File uploaded successfully:', data);
+      setAddedPhotos(prev => [...prev, data.place.image[0]]); // Adjust based on the response
     } catch (error) {
       console.error('Error uploading photo', error);
     }
@@ -72,13 +70,15 @@ const NewPlaces = () => {
     const file = e.target.files[0];
     if (file) {
       setPhotos(file);
+      console.log('Selected file:', file);
     }
   };
 
   // Submit form data to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    // Assuming that `addedPhotos` contains URLs or files
     const formData = {
       title,
       address,
@@ -88,19 +88,19 @@ const NewPlaces = () => {
       checkIn,
       checkOut,
       maxGuests,
-      photos: addedPhotos // Match backend photos field
+      photos: addedPhotos, // Ensure photos are URLs
     };
-
+  
     try {
       const response = await axios.post('http://localhost:3000/api/place/formsubmit', formData);
       console.log('Response:', response.data);
-      // setMessage('Place created successfully!');
+      // Optionally handle success response, e.g., setMessage('Place created successfully!');
     } catch (error) {
       console.error('Error submitting form:', error);
-      // setMessage('Failed to create place. Please check your input.');
+      // Optionally handle error response, e.g., setMessage('Failed to create place.');
     }
   };
-
+  
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-6">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
@@ -164,20 +164,18 @@ const NewPlaces = () => {
           <div className="mt-4">
             <h3 className="text-lg font-medium text-gray-800 mb-2">Added Photos:</h3>
             <div className="grid grid-cols-3 gap-4">
-  {addedPhotos.map((photo, index) => {
-    console.log('Photo is', photo); // Log each photo URL to the console
-
-    return (
-      <img
-        key={index}
-        src={photo} // Use the URL directly
-        alt="Uploaded"
-        className="w-full h-40 object-cover rounded-lg shadow-lg"
-      />
-    );
-  })}
-</div>
-
+              {addedPhotos.map((photo, index) => {
+                console.log('Photo is', photo); // Log each photo URL to the console
+                return (
+                  <img
+                    key={index}
+                    src={photo} // Use the URL directly
+                    alt="Uploaded"
+                    className="w-full h-40 object-cover rounded-lg shadow-lg"
+                  />
+                );
+              })}
+            </div>
           </div>
 
           {/* Description */}
@@ -226,7 +224,7 @@ const NewPlaces = () => {
 
           {/* Extra Info */}
           <div>
-            <label className="block mb-2 text-lg font-medium text-gray-700">Extra Info</label>
+            <label className="block mb-2 text-lg font-medium text-gray-700">Extra Information</label>
             <textarea
               value={extraInfo}
               onChange={(e) => setExtraInfo(e.target.value)}
@@ -235,27 +233,26 @@ const NewPlaces = () => {
             />
           </div>
 
-          {/* Check-In / Check-Out */}
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block mb-2 text-lg font-medium text-gray-700">Check-In Time</label>
-              <input
-                type="time"
-                value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
-                className="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          {/* Check-In */}
+          <div>
+            <label className="block mb-2 text-lg font-medium text-gray-700">Check-In Time</label>
+            <input
+              type="time"
+              value={checkIn}
+              onChange={(e) => setCheckIn(e.target.value)}
+              className="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-            <div className="flex-1">
-              <label className="block mb-2 text-lg font-medium text-gray-700">Check-Out Time</label>
-              <input
-                type="time"
-                value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
-                className="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          {/* Check-Out */}
+          <div>
+            <label className="block mb-2 text-lg font-medium text-gray-700">Check-Out Time</label>
+            <input
+              type="time"
+              value={checkOut}
+              onChange={(e) => setCheckOut(e.target.value)}
+              className="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
 
           {/* Max Guests */}
@@ -265,16 +262,17 @@ const NewPlaces = () => {
               type="number"
               value={maxGuests}
               onChange={(e) => setMaxGuests(e.target.value)}
-              placeholder="Enter max guests"
+              min="1"
               className="mt-1 p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
           >
-            Save Place
+            Submit
           </button>
         </form>
       </div>

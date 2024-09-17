@@ -1,10 +1,12 @@
+require('dotenv').config(); // Ensure this line is at the top of your file
+
+
 const mongoose = require('mongoose');
-require('dotenv').config(); // Add this line to load environment variables
 
 const databaseConnection = async () => {
     try {
         await mongoose.connect(process.env.MONGODB_URI, {
-            // No need to specify useNewUrlParser and useUnifiedTopology anymore
+
         });
         console.log('MongoDB connected');
     } catch (error) {
