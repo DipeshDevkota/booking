@@ -2,8 +2,10 @@ const { findByIdAndDelete } = require('../model/User.model');
 const Place = require('../model/Place.model')
 const imagedownloader = require('image-downloader')
 const path = require('path');
-const uploadonCloudinary = require('../config/cloudinary');
+const {uploadOnCloudinary} = require('../config/cloudinary');
 const multer = require('multer');
+const fs = require('fs');
+
 const jwt = require('jsonwebtoken');  // Add this line
 const { promisify } = require('util');
 // const { fstat } = require('fs');
@@ -68,22 +70,32 @@ const addPlace = async (req, res) => {
       try {
         const newName = `${Date.now()}.jpg`;
         const dest = path.join(__dirname, '../uploads', newName);
-
+    
+        // Download the image
         await imagedownloader.image({
           url: link,
           dest: dest,
         });
-
+    
         console.log('Image downloaded successfully:', newName);
-        return await uploadonCloudinary(dest); // Upload the downloaded image to Cloudinary
-      }
-      catch (error) {
+    
+        // Upload to Cloudinary
+        const cloudinaryUrl = await uploadOnCloudinary(dest);
+    
+        // Delete the file locally only after successful upload
+        if (fs.existsSync(dest)) {
+          fs.unlinkSync(dest); // Delete the local file
+        }
+    
+        return cloudinaryUrl;
+      } catch (error) {
+        console.error('Error handling image from link:', error.message);
         throw new Error('Error handling image from link: ' + error.message);
       }
     };
 
 
-    
+
 
     // Download image from link if provided
     if (link) {
@@ -93,15 +105,15 @@ const addPlace = async (req, res) => {
         throw new Error('Invalid URL format');
       }
 
-      const newName = handleImageFromLink(link);
-
-      imageUrls.push(newName); // Push the local image path to imageUrls array
+      const imageUrl = await handleImageFromLink(link); // Await the resolved URL
+      if (imageUrl) {
+        imageUrls.push(imageUrl); // Push the URL to imageUrls array
+      }// Push the local image path to imageUrls array
     }
 
     // Handle image upload if a file is provided (assumes `req.file` comes from middleware like multer)
     if (req.file) {
-      const imageUrl = uploadonCloudinary(req.file.path)
-
+      const imageUrl = await uploadOnCloudinary(req.file.path)
       imageUrls.push(imageUrl); // Add Cloudinary URL to image array
       fs.unlinkSync(req.file.path); // Remove file from local storage
     }
@@ -220,50 +232,52 @@ const deletePlace = async (req, res) => {
 
 
 
-// const onformSubmit = async (req, res) => {
-//   try {
-//     const {
-//       title,
-//       address,
-//       description,
-//       perks,
-//       extraInfo,
-//       checkIn,
-//       checkOut,
-//       maxGuests,
-//       images
-//     } = req.body;
+const onformSubmit = async (req, res) => {
+  try {
+    const {
+      title,
+      address,
+      description,
+      perks,
+      extraInfo,
+      checkIn,
+      checkOut,
+      maxGuests,
+      photos // Ensure this matches the frontend key
+    } = req.body;
 
-//     // Check for missing required fields
-//     if (!title || !address || !description || !perks || !checkIn || !checkOut || !maxGuests) {
-//       return res.status(400).json({ message: "Field empty" });
-//     }
+    // Check for missing required fields
+    if (!title || !address || !description || !perks || !checkIn || !checkOut || !maxGuests || !photos) {
+      return res.status(400).json({ message: "All fields are required, including photos" });
+    }
 
-//     // Create new place entry
-//     const place = new Place({
-//       title,
-//       address,
-//       description,
-//       perks,
-//       extraInfo,
-//       checkIn,
-//       checkOut,
-//       maxGuests,
-//     });
+    // Create new place entry
+    const place = new Place({
+      title,
+      address,
+      description,
+      perks,
+      extraInfo,
+      checkIn,
+      checkOut,
+      maxGuests,
+      images: photos // Save the images/URLs into the place
+    });
 
-//     await place.save();
+    await place.save();
 
-//     // Send a proper JSON response with both the message and place data
-//     res.status(200).json({
-//       message: "All fields are updated",
-//       place, // Include the place object in the response
-//     });
+    // Send a proper JSON response with both the message and place data
+    res.status(200).json({
+      message: "Place created successfully",
+      place, // Include the place object in the response
+    });
 
-//   } catch (error) {
-//     console.error('Error in form submission:', error);
-//     return res.status(500).json({ message: 'Server error' });
-//   }
-// };
+  } catch (error) {
+    console.error('Error in form submission:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 
 
 
@@ -276,7 +290,7 @@ module.exports = {
   deletePlace,
   // placeByLink,
   // uploadPhoto,
-  // onformSubmit,
+  onformSubmit,
   getallplace
 }
 
