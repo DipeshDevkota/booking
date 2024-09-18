@@ -146,48 +146,10 @@ const addPlace = async (req, res) => {
 
 
 
-const getallplace = async (req, res) => {
-
-  try {
-
-    console.log('Req is:', req)
-    console.log('ReqUser is:', req.userId)
-
-    const userId = req.userId;
-
-    const places = await Place.find({ userId });
-    return res.json(places);
-
-  } catch (err) {
-    console.error('Error fetching places:', err);
-    return res.status(500).json({ message: "Server Error" });
-
-  }
-
-};
 
 
 
-const deletePlace = async (req, res) => {
-  try {
-    // Extract place ID from the request parameters
-    const placeId = req.params.id;
 
-    // Find the place by ID and delete it
-    const place = await Place.findByIdAndDelete(placeId);
-
-    // If the place is not found, return a 404 response
-    if (!place) {
-      return res.status(404).json({ message: 'Place not found' });
-    }
-
-    // If the place is found and deleted, return a success response
-    return res.status(200).json({ message: 'Place deleted successfully' });
-  } catch (error) {
-    // Handle any server errors
-    return res.status(500).json({ message: 'Server error', error });
-  }
-};
 
 
 
@@ -278,6 +240,46 @@ const onformSubmit = async (req, res) => {
   }
 };
 
+
+const getallplace = async (req, res) => {
+  try {
+    // Fetch all places from the database
+    const places = await Place.find(); // This will fetch all places, no need to use id
+
+    // If no places are found, return an empty array
+    if (!places || places.length === 0) {
+      return res.status(404).json({ message: 'No places found' });
+    }
+
+    // Return the list of places
+    return res.status(200).json(places);
+  } catch (err) {
+    // Handle any errors that occur
+    console.error('Error fetching places:', err);
+    return res.status(500).json({ message: 'Server Error', error: err.message });
+  }
+};
+
+const deletePlace = async (req, res) => {
+  try {
+    // Extract place ID from the request parameters
+    const placeId = req.params.id;
+
+    // Find the place by ID and delete it
+    const place = await Place.findByIdAndDelete(placeId); // Pass placeId directly
+
+    // If the place is not found, return a 404 response
+    if (!place) {
+      return res.status(404).json({ message: 'Place not found' });
+    }
+
+    // If the place is found and deleted, return a success response
+    return res.status(200).json({ message: 'Place deleted successfully' });
+  } catch (error) {
+    // Handle any server errors
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
 
 
 
