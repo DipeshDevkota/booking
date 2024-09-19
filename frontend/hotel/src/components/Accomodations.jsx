@@ -39,8 +39,9 @@ const Accomodations = () => {
 
   return (
     <>
-      <Navbar />
-      <div className="container mx-auto p-4 bg-gray-50 min-h-screen">
+         <Navbar className='z-9999'/>
+
+      <div className="container mx-auto p-4 bg-gray-50 min-h-screen w-full">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             List of All Added Places
