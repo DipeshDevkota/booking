@@ -5,24 +5,17 @@ import axios from "axios";
 
 const Accomodations = () => {
   const [places, setPlaces] = useState([]);
-  const [error, setError] = useState(null); // For handling any errors
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPlaces = async () => {
       try {
-        // Fetch places when the component mounts
         const response = await axios.get(
           "http://localhost:3000/api/place/places",
           { withCredentials: true }
         );
-
-        // Log the response for debugging purposes
-        console.log("Response is:", response);
-
-        // Set places from the response
         setPlaces(response.data);
       } catch (error) {
-        // Handle any errors during the fetch operation
         console.error("Error fetching places:", error);
         setError("Failed to fetch places. Please log in.");
       }
@@ -33,17 +26,11 @@ const Accomodations = () => {
 
   const ondelete = async (id) => {
     try {
-      // Make a POST request to the server with the specific place ID
       const response = await axios.post(
         `http://localhost:3000/api/place/delete/${id}`,
         {},
         { withCredentials: true }
       );
-
-      // Optionally log the response
-      console.log("Delete response:", response);
-
-      // Update the state to remove the deleted place from the list
       setPlaces((prevPlaces) => prevPlaces.filter((place) => place._id !== id));
     } catch (error) {
       console.log("Error deleting place:", error);
@@ -55,47 +42,43 @@ const Accomodations = () => {
       <Navbar />
       <div className="container mx-auto p-4 bg-gray-50 min-h-screen">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-semibold text-gray-800 mb-4">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
             List of All Added Places
           </h1>
-          {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-red-500 text-lg">{error}</p>}
         </div>
+
         {places.length > 0 ? (
-          <ul className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {places.map((place) => (
-              <li
-                key={place._id}
-                className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200"
-              >
-                <div className="p-6 flex items-center">
-
-
-                  <img
-                    className="h-24 w-24 object-cover rounded-full border border-gray-300"
-                    src={place.image}
-                    alt={place.title}
-                  />
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">
-                      {place.title}
-                    </h2>
-                    <p className="text-gray-600 mb-2">{place.description}</p>
-                    <span className="block text-gray-500">{place.address}</span>
-                  <button
-                    className="ml-4 px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700 transition"
-                    onClick={() => ondelete(place._id)}
-                  >
-                    Remove
-                  </button>
+              <div key={place._id} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <img src={place.image[0]} alt={`${place.title} image 1`} className="w-full h-48 object-cover rounded-lg" />
+                  <img src={place.image[1]} alt={`${place.title} image 2`} className="w-full h-48 object-cover rounded-lg" />
                 </div>
-              </li>
+                <h2 className="text-2xl font-semibold mb-2 text-gray-800">{place.title}</h2>
+                <p className="text-gray-600 mb-2">{place.description}</p>
+                <p className="text-gray-600 mb-2">Address: {place.address}</p>
+                <p className="text-gray-600 mb-2">Extra Info: {place.extraInfo}</p>
+                <p className="text-gray-600 mb-2">Check-In: {place.checkIn}</p>
+                <p className="text-gray-600 mb-2">Check-Out: {place.checkOut}</p>
+                <p className="text-gray-600 mb-4">Max Guests: {place.maxGuests}</p>
+                <button
+                  className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-300"
+                  onClick={() => ondelete(place._id)}
+                >
+                  Remove
+                </button>
+              </div>
             ))}
-          </ul>
+          </div>
         ) : (
-          <p className="text-gray-600 text-center mt-4">No places added yet.</p>
+          <p className="text-gray-600 text-center mt-4 text-lg">No places added yet.</p>
         )}
+
         <div className="mt-8 text-center">
           <Link
-            className="inline-flex items-center justify-center px-6 py-3 text-xl font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+            className="inline-flex items-center justify-center px-6 py-3 text-xl font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-300"
             to={"/places/new"}
           >
             Add New Place
