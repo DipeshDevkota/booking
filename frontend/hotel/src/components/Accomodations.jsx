@@ -26,7 +26,7 @@ const Accomodations = () => {
 
   const ondelete = async (id) => {
     try {
-      const response = await axios.post(
+      await axios.post(
         `http://localhost:3000/api/place/delete/${id}`,
         {},
         { withCredentials: true }
@@ -39,7 +39,7 @@ const Accomodations = () => {
 
   return (
     <>
-         <Navbar className='z-9999'/>
+      <Navbar className="z-9999" />
 
       <div className="container mx-auto p-4 bg-gray-50 min-h-screen w-full">
         <div className="text-center mb-8">
@@ -52,18 +52,33 @@ const Accomodations = () => {
         {places.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {places.map((place) => (
-              <div key={place._id} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div
+                key={place._id}
+                className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <img src={place.image[0]} alt={`${place.title} image 1`} className="w-full h-48 object-cover rounded-lg" />
-                  <img src={place.image[1]} alt={`${place.title} image 2`} className="w-full h-48 object-cover rounded-lg" />
+                  {place.image.map((img, index) => (
+                    <img
+                      key={index}
+                      src={img}
+                      alt={`${place.title} image ${index + 1}`}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                  ))}
                 </div>
-                <h2 className="text-2xl font-semibold mb-2 text-gray-800">{place.title}</h2>
+
+                <h2 className="text-2xl font-semibold mb-2 text-gray-800">
+                  {place.title}
+                </h2>
                 <p className="text-gray-600 mb-2">{place.description}</p>
                 <p className="text-gray-600 mb-2">Address: {place.address}</p>
                 <p className="text-gray-600 mb-2">Extra Info: {place.extraInfo}</p>
                 <p className="text-gray-600 mb-2">Check-In: {place.checkIn}</p>
                 <p className="text-gray-600 mb-2">Check-Out: {place.checkOut}</p>
                 <p className="text-gray-600 mb-4">Max Guests: {place.maxGuests}</p>
+                <p className="text-gray-600 mb-4">Price: {place.price}</p>
+
+
                 <button
                   className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-300"
                   onClick={() => ondelete(place._id)}
@@ -74,7 +89,9 @@ const Accomodations = () => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 text-center mt-4 text-lg">No places added yet.</p>
+          <p className="text-gray-600 text-center mt-4 text-lg">
+            No places added yet.
+          </p>
         )}
 
         <div className="mt-8 text-center">

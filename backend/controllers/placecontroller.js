@@ -55,6 +55,7 @@ const addPlace = async (req, res) => {
       extraInfo,
       checkIn,
       checkOut,
+      price,
       maxGuests,
       link
     } = req.body;
@@ -129,6 +130,7 @@ const addPlace = async (req, res) => {
       checkIn,
       checkOut,
       maxGuests,
+      price,
       image: imageUrls, // Save the array of image URLs (local/cloudinary)
     });
 
@@ -204,12 +206,13 @@ const onformSubmit = async (req, res) => {
       extraInfo,
       checkIn,
       checkOut,
+      price,
       maxGuests,
       photos 
     } = req.body;
 
     // Check for missing required fields
-    if (!title || !address || !description || !perks || !checkIn || !checkOut || !maxGuests || !photos) {
+    if (!title || !address || !description || !perks || !checkIn || !checkOut || !maxGuests || !photos || !price) {
       return res.status(400).json({ message: "All fields are required, including photos" });
     }
 
@@ -223,6 +226,7 @@ const onformSubmit = async (req, res) => {
       checkIn,
       checkOut,
       maxGuests,
+      price,
       image: photos 
     });
 
